@@ -46,3 +46,30 @@ export const getMyGear = asyncHandler(async (req: Request, res: Response) => {
     data: gear,
   });
 });
+
+export const getIncomingOrders = asyncHandler(
+  async (req: Request, res: Response) => {
+    const orders = await providerService.getIncomingOrders(req.user!.userId);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  },
+);
+
+export const updateOrderStatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const order = await providerService.updateOrderStatus(
+      req.user!.userId,
+      req.params.id as string,
+      req.body.status,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated",
+      data: order,
+    });
+  },
+);

@@ -21,3 +21,7 @@ export type UpdateGearInput = {
   specifications?: Record<string, unknown>;
   imageUrl?: string;
 };
+
+export type UpdateOrderStatusInput = {
+  status: "CONFIRMED" | "PICKED_UP" | "RETURNED";
+};

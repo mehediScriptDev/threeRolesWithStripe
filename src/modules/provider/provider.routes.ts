@@ -13,4 +13,7 @@ providerRoutes.post("/gear", providerController.addGear);
 providerRoutes.put("/gear/:id", providerController.updateGear);
 providerRoutes.delete("/gear/:id", providerController.deleteGear);
 
+providerRoutes.get("/orders", providerController.getIncomingOrders);
+providerRoutes.patch("/orders/:id", providerController.updateOrderStatus);
+
 export default providerRoutes;

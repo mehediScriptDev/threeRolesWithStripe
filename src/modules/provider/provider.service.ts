@@ -142,3 +142,89 @@ export const getMyGear = async (providerId: string) => {
     orderBy: { createdAt: "desc" },
   });
 };
+
+const providerOrderInclude = {
+  customer: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  },
+  items: {
+    include: {
+      gearItem: {
+        include: {
+          category: true,
+        },
+      },
+    },
+  },
+  payments: true,
+} satisfies Prisma.RentalOrderInclude;
+
+export const getIncomingOrders = async (providerId: string) => {
+  return prisma.rentalOrder.findMany({
+    where: {
+      items: {
+        some: {
+          gearItem: {
+            providerId,
+          },
+        },
+      },
+    },
+    include: providerOrderInclude,
+    orderBy: { createdAt: "desc" },
+  });
+};
+
+const providerTransitions: Record<string, string[]> = {
+  PLACED: ["CONFIRMED"],
+  PAID: ["PICKED_UP"],
+  PICKED_UP: ["RETURNED"],
+};
+
+export const updateOrderStatus = async (
+  providerId: string,
+  orderId: string,
+  status: string,
+) => {
+  const order = await prisma.rentalOrder.findUnique({
+    where: { id: orderId },
+    include: {
+      items: {
+        include: {
+          gearItem: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new AppError("Rental order not found", 404);
+  }
+
+  const ownsOrder = order.items.some(
+    (item) => item.gearItem.providerId === providerId,
+  );
+
+  if (!ownsOrder) {
+    throw new AppError("You can only update orders for your own gear", 403);
+  }
+
+  const allowedNext = providerTransitions[order.status] || [];
+
+  if (!allowedNext.includes(status)) {
+    throw new AppError(
+      `Cannot change status from ${order.status} to ${status}. Allowed: ${allowedNext.join(", ") || "none"}`,
+      400,
+    );
+  }
+
+  return prisma.rentalOrder.update({
+    where: { id: orderId },
+    data: { status: status as never },
+    include: providerOrderInclude,
+  });
+};
