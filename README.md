@@ -4,7 +4,7 @@ Sports & outdoor gear rental backend.
 
 Roles: **Customer** | **Provider** | **Admin**
 
-Base URL: `http://localhost:3000`
+Base URL (local): `http://localhost:3000`
 
 Use **Postman** / **Thunder Client** / **Insomnia**.  
 For protected routes, add header:
@@ -15,7 +15,7 @@ Authorization: Bearer <your_jwt_token>
 
 ---
 
-## Setup
+## Setup (local)
 
 ```bash
 npm install
@@ -29,6 +29,58 @@ Admin seed account:
 |----------|-------------------|
 | email    | `admin@gearup.com` |
 | password | `admin123`         |
+
+---
+
+## Deploy (Render — easiest)
+
+Do **not** use Vercel for this project. This is a normal Express API. Use [Render](https://render.com).
+
+### Steps
+
+1. Push your code to GitHub (already done).
+2. Go to [https://render.com](https://render.com) → **New** → **Web Service**.
+3. Connect the `threeRolesWithStripe` repo.
+4. Settings:
+
+| Setting | Value |
+|---------|--------|
+| Runtime | Node |
+| Build Command | `npm install` |
+| Start Command | `npm start` |
+| Instance | Free |
+
+5. Add **Environment Variables**:
+
+| Key | Value |
+|-----|--------|
+| `DATABASE_URL` | `file:./prisma/dev.db` |
+| `JWT_SECRET` | any long random string |
+| `JWT_EXPIRES_IN` | `7d` |
+| `NODE_ENV` | `production` |
+| `APP_URL` | your Render URL (set after first deploy, e.g. `https://gearup-xxx.onrender.com`) |
+| `STRIPE_SECRET_KEY` | your `sk_test_...` |
+| `STRIPE_PUBLISHABLE_KEY` | your `pk_test_...` |
+| `SSLCOMMERZ_IS_SANDBOX` | `true` |
+
+6. Click **Create Web Service** and wait.
+7. Open: `https://your-service.onrender.com/health`
+
+### Notes
+
+- Free Render services sleep after idle; first request can take ~30–60s.
+- SQLite file can reset when the free instance restarts (fine for assignment demo).
+- After deploy, use your Render URL in Postman instead of `localhost:3000`.
+
+### Optional: public URL without cloud deploy
+
+Keep running locally, then:
+
+```bash
+npx ngrok http 3000
+```
+
+Share the ngrok HTTPS URL for testing.
 
 ---
 

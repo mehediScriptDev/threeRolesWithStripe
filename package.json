@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "postinstall": "prisma generate",
-    "build": "prisma generate && tsc",
-    "start": "node dist/src/server.js",
+    "build": "prisma generate",
+    "start": "prisma db push && tsx prisma/seed.ts && tsx src/server.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "setup": "prisma db push && tsx prisma/seed.ts"
@@ -19,8 +19,6 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^26.1.1",
     "@types/pg": "^8.20.0",
-    "prisma": "^7.8.0",
-    "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   },
   "dependencies": {
@@ -38,6 +36,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
-    "stripe": "^22.3.1"
+    "prisma": "^7.8.0",
+    "stripe": "^22.3.1",
+    "tsx": "^4.23.1"
   }
 }
