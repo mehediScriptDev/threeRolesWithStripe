@@ -16,7 +16,6 @@ export const getAllGear = async (filters: GearFilters) => {
   if (filters.brand) {
     where.brand = {
       contains: filters.brand,
-      mode: "insensitive",
     };
   }
 
