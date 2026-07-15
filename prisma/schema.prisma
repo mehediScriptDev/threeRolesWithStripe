@@ -1,16 +1,11 @@
-// GearUp - Sports & Outdoor Gear Rental API
-// https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
-
-// ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Role {
   CUSTOMER
@@ -43,8 +38,6 @@ enum PaymentStatus {
   FAILED
 }
 
-// ─── Users ───────────────────────────────────────────────────────────────────
-
 model User {
   id        String     @id @default(cuid())
   email     String     @unique
@@ -63,8 +56,6 @@ model User {
   @@map("users")
 }
 
-// ─── Categories ──────────────────────────────────────────────────────────────
-
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -78,8 +69,6 @@ model Category {
   @@map("categories")
 }
 
-// ─── Gear Items ──────────────────────────────────────────────────────────────
-
 model GearItem {
   id             String   @id @default(cuid())
   providerId     String
@@ -87,7 +76,7 @@ model GearItem {
   name           String
   description    String
   brand          String
-  pricePerDay    Decimal  @db.Decimal(10, 2)
+  pricePerDay    Decimal
   stock          Int      @default(1)
   isAvailable    Boolean  @default(true)
   specifications Json?
@@ -95,27 +84,24 @@ model GearItem {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  provider   User             @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  category   Category         @relation(fields: [categoryId], references: [id])
+  provider   User              @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category   Category          @relation(fields: [categoryId], references: [id])
   orderItems RentalOrderItem[]
   reviews    Review[]
 
   @@index([providerId])
   @@index([categoryId])
   @@index([brand])
-  @@index([pricePerDay])
   @@map("gear_items")
 }
-
-// ─── Rental Orders ───────────────────────────────────────────────────────────
 
 model RentalOrder {
   id          String            @id @default(cuid())
   customerId  String
   status      RentalOrderStatus @default(PLACED)
-  startDate   DateTime          @db.Date
-  endDate     DateTime          @db.Date
-  totalAmount Decimal           @db.Decimal(10, 2)
+  startDate   DateTime
+  endDate     DateTime
+  totalAmount Decimal
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -134,7 +120,7 @@ model RentalOrderItem {
   rentalOrderId String
   gearItemId    String
   quantity      Int     @default(1)
-  pricePerDay   Decimal @db.Decimal(10, 2)
+  pricePerDay   Decimal
 
   rentalOrder RentalOrder @relation(fields: [rentalOrderId], references: [id], onDelete: Cascade)
   gearItem    GearItem    @relation(fields: [gearItemId], references: [id])
@@ -144,13 +130,11 @@ model RentalOrderItem {
   @@map("rental_order_items")
 }
 
-// ─── Payments ────────────────────────────────────────────────────────────────
-
 model Payment {
   id            String        @id @default(cuid())
   rentalOrderId String
   customerId    String
-  amount        Decimal       @db.Decimal(10, 2)
+  amount        Decimal
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
   transactionId String?       @unique
@@ -166,8 +150,6 @@ model Payment {
   @@index([status])
   @@map("payments")
 }
-
-// ─── Reviews ─────────────────────────────────────────────────────────────────
 
 model Review {
   id            String   @id @default(cuid())
