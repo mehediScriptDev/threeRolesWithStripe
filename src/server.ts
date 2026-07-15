@@ -1,13 +1,16 @@
-import app from "./app";
+import "dotenv/config";
+import app from "./app.js";
+import { config } from "./config/index.js";
 
 async function main() {
-    try {
-        app.listen(3000,()=>{
-            console.log("Server is running on port 3000");
-        })
-    } catch (error) {
-        console.error("Error starting server:", error);
-        process.exit(1);
-    }
+  try {
+    app.listen(config.port, () => {
+      console.log(`GearUp server running on port ${config.port}`);
+    });
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1);
+  }
 }
+
 main();

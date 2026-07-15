@@ -1,7 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// GearUp - Sports & Outdoor Gear Rental API
+// https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +8,182 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum RentalOrderStatus {
+  PLACED
+  CONFIRMED
+  CANCELLED
+  PAID
+  PICKED_UP
+  RETURNED
+}
+
+enum PaymentMethod {
+  STRIPE
+  SSLCOMMERZ
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  role      Role
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  gearItems    GearItem[]
+  rentalOrders RentalOrder[] @relation("CustomerOrders")
+  payments     Payment[]
+  reviews      Review[]
+
+  @@map("users")
+}
+
+// ─── Categories ──────────────────────────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gearItems GearItem[]
+
+  @@map("categories")
+}
+
+// ─── Gear Items ──────────────────────────────────────────────────────────────
+
+model GearItem {
+  id             String   @id @default(cuid())
+  providerId     String
+  categoryId     String
+  name           String
+  description    String
+  brand          String
+  pricePerDay    Decimal  @db.Decimal(10, 2)
+  stock          Int      @default(1)
+  isAvailable    Boolean  @default(true)
+  specifications Json?
+  imageUrl       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  provider   User             @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category   Category         @relation(fields: [categoryId], references: [id])
+  orderItems RentalOrderItem[]
+  reviews    Review[]
+
+  @@index([providerId])
+  @@index([categoryId])
+  @@index([brand])
+  @@index([pricePerDay])
+  @@map("gear_items")
+}
+
+// ─── Rental Orders ───────────────────────────────────────────────────────────
+
+model RentalOrder {
+  id          String            @id @default(cuid())
+  customerId  String
+  status      RentalOrderStatus @default(PLACED)
+  startDate   DateTime          @db.Date
+  endDate     DateTime          @db.Date
+  totalAmount Decimal           @db.Decimal(10, 2)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  customer User              @relation("CustomerOrders", fields: [customerId], references: [id])
+  items    RentalOrderItem[]
+  payments Payment[]
+  reviews  Review[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("rental_orders")
+}
+
+model RentalOrderItem {
+  id            String  @id @default(cuid())
+  rentalOrderId String
+  gearItemId    String
+  quantity      Int     @default(1)
+  pricePerDay   Decimal @db.Decimal(10, 2)
+
+  rentalOrder RentalOrder @relation(fields: [rentalOrderId], references: [id], onDelete: Cascade)
+  gearItem    GearItem    @relation(fields: [gearItemId], references: [id])
+
+  @@index([rentalOrderId])
+  @@index([gearItemId])
+  @@map("rental_order_items")
+}
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+
+model Payment {
+  id            String        @id @default(cuid())
+  rentalOrderId String
+  customerId    String
+  amount        Decimal       @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  rentalOrder RentalOrder @relation(fields: [rentalOrderId], references: [id])
+  customer    User        @relation(fields: [customerId], references: [id])
+
+  @@index([rentalOrderId])
+  @@index([customerId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ─── Reviews ─────────────────────────────────────────────────────────────────
+
+model Review {
+  id            String   @id @default(cuid())
+  customerId    String
+  gearItemId    String
+  rentalOrderId String
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer    User        @relation(fields: [customerId], references: [id])
+  gearItem    GearItem    @relation(fields: [gearItemId], references: [id])
+  rentalOrder RentalOrder @relation(fields: [rentalOrderId], references: [id])
+
+  @@unique([customerId, rentalOrderId, gearItemId])
+  @@index([gearItemId])
+  @@map("reviews")
 }
