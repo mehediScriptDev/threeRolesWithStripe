@@ -2,6 +2,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Application, type Request, type Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import categoryRoutes from "./modules/category/category.routes.js";
+import gearRoutes from "./modules/gear/gear.routes.js";
+import providerRoutes from "./modules/provider/provider.routes.js";
 
 const app: Application = express();
 
@@ -21,10 +25,10 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ success: true, status: "ok" });
 });
 
-// Module routes will be mounted here in later parts:
-// app.use("/api/auth", authRoutes);
-// app.use("/api/gear", gearRoutes);
-// ...
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/gear", gearRoutes);
+app.use("/api/provider", providerRoutes);
 
 app.use(errorHandler);
 

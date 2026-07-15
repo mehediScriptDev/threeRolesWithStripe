@@ -2,10 +2,6 @@ import type { NextFunction, Request, Response } from "express";
 import type { Role } from "../../generated/prisma/client.js";
 import { AppError } from "../utils/AppError.js";
 
-/**
- * Role-based access control middleware.
- * Usage: authorize("ADMIN"), authorize("PROVIDER", "ADMIN")
- */
 export const authorize =
   (...allowedRoles: Role[]) =>
   (req: Request, _res: Response, next: NextFunction) => {
