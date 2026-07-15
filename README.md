@@ -13,6 +13,28 @@ For protected routes, add header:
 Authorization: Bearer <your_jwt_token>
 ```
 
+### Postman collection
+
+Import this file in Postman:
+
+```text
+postman/GearUp_API.postman_collection.json
+```
+
+Base URL is already set to the live API:
+
+```text
+https://gearup-api-kbz0.onrender.com
+```
+
+To publish API docs for submission:
+
+1. Import the collection into Postman  
+2. Click the collection → **View documentation** / **Publish**  
+3. Copy the public docs URL (looks like `https://documenter.getpostman.com/view/...`)
+
+Tokens and IDs are auto-saved into collection variables when you run Login / Create requests in order.
+
 ---
 
 ## Setup (local)
